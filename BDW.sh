@@ -1,0 +1,279 @@
+#!/usr/bin/env bash
+PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
+export PATH
+
+sh_ver="1.0.0"
+file="/root/BaiduPCS-Web"
+Folder="/usr/local/BaiduPCS-Web"
+BaiduPCS-Go="/usr/bin/BaiduPCS-Go"
+
+red='\e[91m'
+green='\e[92m'
+yellow='\e[93m'
+magenta='\e[95m'
+cyan='\e[96m'
+none='\e[0m'
+
+
+Green_font_prefix="\033[32m" && Red_font_prefix="\033[31m" && Green_background_prefix="\033[42;37m" && Red_background_prefix="\033[41;37m" && Font_color_suffix="\033[0m"
+Info="${Green_font_prefix}[信息]${Font_color_suffix}"
+Error="${Red_font_prefix}[错误]${Font_color_suffix}"
+Tip="${Green_font_prefix}[注意]${Font_color_suffix}"
+
+check_root(){
+	[[ $EUID != 0 ]] && echo -e "${Error} 当前非ROOT账号(或没有ROOT权限)，无法继续操作，请更换ROOT账号或使用 ${Green_background_prefix}sudo su${Font_color_suffix} 命令获取临时ROOT权限（执行后可能会提示输入当前账号的密码）。" && exit 1
+}
+#检查系统
+check_sys(){
+	if [[ -f /etc/redhat-release ]]; then
+		release="centos"
+	elif cat /etc/issue | grep -q -E -i "debian"; then
+		release="debian"
+	elif cat /etc/issue | grep -q -E -i "ubuntu"; then
+		release="ubuntu"
+	elif cat /etc/issue | grep -q -E -i "centos|red hat|redhat"; then
+		release="centos"
+	elif cat /proc/version | grep -q -E -i "debian"; then
+		release="debian"
+	elif cat /proc/version | grep -q -E -i "ubuntu"; then
+		release="ubuntu"
+	elif cat /proc/version | grep -q -E -i "centos|red hat|redhat"; then
+		release="centos"
+    fi
+	bit=`uname -m`
+}
+check_installed_status(){
+	[[ ! -e ${BaiduPCS-Go} ]] && echo -e "${Error} BaiduPCS-Web 没有安装，请检查 !" && exit 1
+	[[ ! -e ${BaiduPCS-Web_conf} ]] && echo -e "${Error} BaiduPCS-Web 配置文件不存在，请检查 !" && [[ $1 != "un" ]] && exit 1
+}
+check_pid(){
+	PID=`ps -ef| grep "BaiduPCS-Go"| grep -v grep| grep -v "BDW.sh"| grep -v "init.d"| grep -v "service"| awk '{print $2}'`
+}
+check_new_ver(){
+	echo -e "${Info} 请输入 BaiduPCS-Web 版本号，格式如：[ 1.34.0 ]，获取地址：[ https://github.com/liuzhuoling2011/baidupcs-web/releases ]"
+	read -e -p "默认回车自动获取最新版本号:" BaiduPCS_Web_new_ver
+	if [[ -z ${BaiduPCS_Web_new_ver} ]]; then
+		BaiduPCS_Web_new_ver="$(curl -H 'Cache-Control: no-cache' -s "https://api.github.com/repos/liuzhuoling2011/BaiduPCS-Web/releases/latest" | grep 'tag_name' | cut -d\" -f4)"
+		if [[ -z ${BaiduPCS_Web_new_ver} ]]; then
+			echo -e "${Error} BaiduPCS-Web 最新版本获取失败，请手动获取最新版本号[ https://github.com/liuzhuoling2011/baidupcs-web/releases ]"
+			read -e -p "请输入版本号 [ 格式如 1.34.0 ] :" BaiduPCS_Web_new_ver
+			[[ -z "${BaiduPCS_Web_new_ver}" ]] && echo "取消..." && exit 1
+		else
+			echo -e "${Info} 检测到 BaiduPCS-Web 最新版本为 [ ${BaiduPCS_Web_new_ver} ]"
+		fi
+	else
+		echo -e "${Info} 即将准备下载 BaiduPCS-Web 版本为 [ ${BaiduPCS_Web_new_ver} ]"
+	fi
+}
+check_ver_comparison(){
+	BaiduPCS_Web_now_ver=$(${BaiduPCS-Go} -v|head -n 1|awk '{print $3}')
+	[[ -z ${BaiduPCS_Web_now_ver} ]] && echo -e "${Error} BaiduPCS_Web 当前版本获取失败 !" && exit 1
+	if [[ "${BaiduPCS_Web_now_ver}" != "${BaiduPCS_Web_new_ver}" ]]; then
+		echo -e "${Info} 发现 BaiduPCS-Web 已有新版本 [ ${BaiduPCS_Web_new_ver} ](当前版本：${BaiduPCS_Web_now_ver})"
+		read -e -p "是否更新(会中断当前下载任务，请注意) ? [Y/n] :" yn
+		[[ -z "${yn}" ]] && yn="y"
+		if [[ $yn == [Yy] ]]; then
+			check_pid
+			[[ ! -z $PID ]] && kill -9 ${PID}
+			Download_BaiduPCS-Web "update"
+			Start_BaiduPCS-Web
+		fi
+	else
+		echo -e "${Info} 当前 BaiduPCS-Web 已是最新版本 [ ${BaiduPCS_Web_new_ver} ]" && exit 1
+	fi
+}
+Download_BaiduPCS-Web(){
+	update_dl=$1
+	cd "/usr/local"
+	#echo -e "${bit}"
+	if [[ ${bit} == "x86_64" ]]; then
+		bit="amd64"
+	elif [[ ${bit} == "i386" || ${bit} == "i686" ]]; then
+		bit="86"
+	else
+		bit="arm64"
+	fi
+	wget -N --no-check-certificate "http://qiniu.zoranjojo.top/BaiduPCS-Go-${BaiduPCS_Web_new_ver}-linux-${bit}.zip"
+	BaiduPCS-Web_Name="BaiduPCS-Go-${BaiduPCS_Web_new_ver}-linux-${bit}.zip"
+	[[ ! -s ${BaiduPCS-Web_Name} ]] && echo -e "${Error} BaiduPCS-Web 压缩包下载失败 !" && exit 1
+	unzip ${BaiduPCS-Web_Name}
+	[[ ! -e "/usr/local/${BaiduPCS-Web_Name}" ]] && echo -e "${Error} BaiduPCS-Web 解压失败 !" && rm -rf ${BaiduPCS-Web_Name} && exit 1
+	[[ ${update_dl} = "update" ]] && rm -rf "${Folder}"
+	mv "/usr/local/${BaiduPCS-Web_Name}" "${Folder}"
+	[[ ! -e "${Folder}" ]] && echo -e "${Error} BaiduPCS-Web 文件夹重命名失败 !" && rm -rf ${BaiduPCS-Web_Name} && rm -rf "/usr/local/${BaiduPCS-Web_Name}" && exit 1
+	rm -rf ${BaiduPCS-Web_Name}
+	cd "${Folder}"
+	chmod a+x BaiduPCS-Go
+	echo -e "${Info} BaiduPCS-Web 主程序安装完毕！..."
+}
+
+## 以后再修改
+Service_BaiduPCS-Web(){
+	if [[ ${release} = "centos" ]]; then
+		if ! wget --no-check-certificate https://raw.githubusercontent.com/user1121114685/doubi/master/service/BaiduPCS-Web_centos -O /etc/init.d/BaiduPCS-Web; then
+			echo -e "${Error} BaiduPCS-Web服务 管理脚本下载失败 !" && exit 1
+		fi
+		chmod +x /etc/init.d/BaiduPCS-Web
+		chkconfig --add BaiduPCS-Web
+		chkconfig BaiduPCS-Web on
+	else
+		if ! wget --no-check-certificate https://raw.githubusercontent.com/user1121114685/doubi/master/service/BaiduPCS-Web_debian -O /etc/init.d/BaiduPCS-Web; then
+			echo -e "${Error} BaiduPCS-Web服务 管理脚本下载失败 !" && exit 1
+		fi
+		chmod +x /etc/init.d/BaiduPCS-Web
+		update-rc.d -f BaiduPCS-Web defaults
+	fi
+	echo -e "${Info} BaiduPCS-Web服务 管理脚本下载完成 !"
+}
+
+ Installation_dependency(){
+ 	if [[ ${release} = "centos" ]]; then
+		yum update
+ 		yum install -y  git zip unzip curl wget
+ 	else
+		apt-get update
+		apt-get install -y git zip unzip curl wget
+ 	fi
+ }
+Install_BaiduPCS-Web(){
+	check_root
+	[[ -e ${BaiduPCS-Go} ]] && echo -e "${Error} BaiduPCS-Web 已安装，请检查 !" && exit 1
+	check_sys
+	echo -e "${Info} 开始安装/配置 依赖..."
+	Installation_dependency
+	echo -e "${Info} 开始下载/安装 主程序..."
+	check_new_ver
+	Download_BaiduPCS-Web
+	echo -e "${Info} 开始下载/安装 服务脚本(init)..."
+	Service_BaiduPCS-Web
+	echo -e "${Info} 所有步骤 安装完毕，开始启动..."
+	Start_BaiduPCS-Web
+}
+Start_BaiduPCS-Web(){
+	check_installed_status
+	check_pid
+	[[ ! -z ${PID} ]] && echo -e "${Error} BaiduPCS-Web 正在运行，请检查 !" && exit 1
+	./BaiduPCS-Go
+	/etc/init.d/BaiduPCS-Web start
+}
+Stop_BaiduPCS-Web(){
+	check_installed_status
+	check_pid
+	[[ -z ${PID} ]] && echo -e "${Error} BaiduPCS-Web 没有运行，请检查 !" && exit 1
+	/etc/init.d/BaiduPCS-Web stop
+}
+Restart_BaiduPCS-Web(){
+	check_installed_status
+	check_pid
+	[[ ! -z ${PID} ]] && /etc/init.d/BaiduPCS-Web stop
+	/etc/init.d/BaiduPCS-Web start
+}
+
+Update_BaiduPCS-Web(){
+	check_installed_status
+	check_new_ver
+	check_ver_comparison
+}
+Uninstall_BaiduPCS-Web(){
+	check_installed_status "un"
+	echo "确定要卸载 BaiduPCS-Web ? (y/N)"
+	echo
+	read -e -p "(默认: n):" unyn
+	[[ -z ${unyn} ]] && unyn="n"
+	if [[ ${unyn} == [Yy] ]]; then
+		check_pid
+		[[ ! -z $PID ]] && kill -9 ${PID}
+		rm -rf "${BaiduPCS-Go}"
+		rm -rf "${Folder}"
+		rm -rf "${file}"
+		if [[ ${release} = "centos" ]]; then
+			chkconfig --del BaiduPCS-Web
+		else
+			update-rc.d -f BaiduPCS-Web remove
+		fi
+		rm -rf "/etc/init.d/BaiduPCS-Web"
+		echo && echo "BaiduPCS-Web 卸载完成 !" && echo
+	else
+		echo && echo "卸载已取消..." && echo
+	fi
+}
+
+
+Update_Shell(){
+	local latest_version=$(curl -H 'Cache-Control: no-cache' -s -L "https://raw.githubusercontent.com/user1121114685/baidupcsweb/master/BDW.sh" | grep '_version' -m1 | cut -d\" -f2)
+	if [[ ! $latest_version ]]; then
+		echo
+		echo -e " $red获取 BaiduPCS_Web 最新版本失败!!!$none"
+		echo
+		echo -e " 请检查网络配置！"
+		echo
+		echo " 然后再继续...."
+		echo
+		exit 1
+	fi
+
+	if [[ $latest_version == $sh_ver ]]; then
+		echo
+		echo -e "$green 木有发现新版本 $none"
+		echo
+	else
+		echo
+		echo -e " $green 咦...发现新版本耶....正在拼命更新.......$none"
+		echo
+		wget -N --no-check-certificate "https://raw.githubusercontent.com/user1121114685/baidupcsweb/master/BDW.sh" && chmod +x BDW.sh
+		echo -e "脚本已更新为最新版本[ ${sh_new_ver} ] !(注意：因为更新方式为直接覆盖当前运行的脚本，所以可能下面会提示一些报错，无视即可)" && exit 0
+	fi
+}
+
+echo && echo -e " BaiduPCS-Web 一键安装管理脚本 ${Red_font_prefix}[v${sh_ver}]${Font_color_suffix}
+  -- Toyo | doub.io/shell-jc4 --
+  
+ ${Green_font_prefix} 0.${Font_color_suffix} 升级脚本
+————————————
+ ${Green_font_prefix} 1.${Font_color_suffix} 安装 BaiduPCS-Web
+ ${Green_font_prefix} 2.${Font_color_suffix} 更新 BaiduPCS-Web
+ ${Green_font_prefix} 3.${Font_color_suffix} 卸载 BaiduPCS-Web
+————————————
+ ${Green_font_prefix} 4.${Font_color_suffix} 启动 BaiduPCS-Web
+ ${Green_font_prefix} 5.${Font_color_suffix} 停止 BaiduPCS-Web
+ ${Green_font_prefix} 6.${Font_color_suffix} 重启 BaiduPCS-Web
+————————————" && echo
+if [[ -e ${BaiduPCS-Go} ]]; then
+	check_pid
+	if [[ ! -z "${PID}" ]]; then
+		echo -e " 当前状态: ${Green_font_prefix}已安装${Font_color_suffix} 并 ${Green_font_prefix}已启动${Font_color_suffix}"
+	else
+		echo -e " 当前状态: ${Green_font_prefix}已安装${Font_color_suffix} 但 ${Red_font_prefix}未启动${Font_color_suffix}"
+	fi
+else
+	echo -e " 当前状态: ${Red_font_prefix}未安装${Font_color_suffix}"
+fi
+echo
+read -e -p " 请输入数字 [0-10]:" num
+case "$num" in
+	0)
+	Update_Shell
+	;;
+	1)
+	Install_BaiduPCS-Web
+	;;
+	2)
+	Update_BaiduPCS-Web
+	;;
+	3)
+	Uninstall_BaiduPCS-Web
+	;;
+	4)
+	Start_BaiduPCS-Web
+	;;
+	5)
+	Stop_BaiduPCS-Web
+	;;
+	6)
+	Restart_BaiduPCS-Web
+	;;
+	*)
+	echo "请输入正确数字 [0-6]"
+	;;
+esac
+fi
