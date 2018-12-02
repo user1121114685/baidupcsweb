@@ -1,0 +1,14 @@
+[Unit]
+Description=BaiduPCS-Web
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/BaiduPCS-Web/BaiduPCS-Go
+Restart=on-failure
+# Don't restart in the case of configuration error
+RestartPreventExitStatus=23
+
+[Install]
+WantedBy=multi-user.target

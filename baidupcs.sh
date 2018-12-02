@@ -154,6 +154,8 @@ install_BaiduPCS-Web() {
 
 		mkdir -p /etc/BaiduPCS-Web/shaoxia/BaiduPCS-Web
 		git clone https://github.com/user1121114685/baidupcsweb.git /etc/BaiduPCS-Web/shaoxia/BaiduPCS-Web
+		cd /etc/BaiduPCS-Web/shaoxia/BaiduPCS-Web
+		cp -f /etc/BaiduPCS-Web/shaoxia/BaiduPCS-Web/BaiduPCS-Web.service /lib/systemd/system/BaiduPCS-Web.service
 ## 这里还需修改
 
 	if [[ ! -d /etc/BaiduPCS-Web/shaoxia/BaiduPCS-Web ]]; then
@@ -240,6 +242,7 @@ update_BaiduPCS-Web.sh() {
 		cd /etc/BaiduPCS-Web/shaoxia/BaiduPCS-Web
 		git pull
 		cp -f /etc/BaiduPCS-Web/shaoxia/BaiduPCS-Web/baidupcs.sh $_BaiduPCS-Web_sh
+		cp -f /etc/BaiduPCS-Web/shaoxia/BaiduPCS-Web/BaiduPCS-Web.service /lib/systemd/system/BaiduPCS-Web.service
 		chmod +x $_BaiduPCS-Web_sh
 		echo
 		echo -e "$green 更新成功啦...当前 BaiduPCS-Web 管理脚本 版本: ${cyan}$latest_version$none"
@@ -328,7 +331,7 @@ do_service() {
 ## 帮助还需修改
 _help() {
 	echo
-	echo "........... BaiduPCS-Web 管理脚本帮助信息 by BaiduPCS-Web66.com .........."
+	echo "........... BaiduPCS-Web 管理脚本帮助信息 by 联盟少侠 .........."
 	echo -e "
 	${green}BaiduPCS-Web menu $none管理 BaiduPCS-Web (同等于直接输入 BaiduPCS-Web)
 
