@@ -152,11 +152,11 @@ install_BaiduPCS-Web() {
 	fi
 
 
-		mkdir -p /etc/BaiduPCS-Web/233boy/BaiduPCS-Web
-		git clone https://github.com/233boy/BaiduPCS-Web /etc/BaiduPCS-Web/233boy/BaiduPCS-Web
+		mkdir -p /etc/BaiduPCS-Web/shaoxia/BaiduPCS-Web
+		git clone https://github.com/user1121114685/baidupcsweb.git /etc/BaiduPCS-Web/shaoxia/BaiduPCS-Web
 ## 这里还需修改
 
-	if [[ ! -d /etc/BaiduPCS-Web/233boy/BaiduPCS-Web ]]; then
+	if [[ ! -d /etc/BaiduPCS-Web/shaoxia/BaiduPCS-Web ]]; then
 		echo
 		echo -e "$red 哎呀呀...克隆脚本仓库出错了...$none"
 		echo
@@ -216,8 +216,7 @@ update_BaiduPCS-Web() {
 	fi
 }
 update_BaiduPCS-Web.sh() {
-	local latest_version=$(curl -H 'Cache-Control: no-cache' -s -L "https://raw.githubusercontent.com/233boy/BaiduPCS-Web/master/BaiduPCS-Web.sh" | grep '_version' -m1 | cut -d\" -f2)
-	## 这里还需修改
+	local latest_version=$(curl -H 'Cache-Control: no-cache' -s -L "https://raw.githubusercontent.com/user1121114685/baidupcsweb/master/baidupcs.sh" | grep '_version' -m1 | cut -d\" -f2)
 
 	if [[ ! $latest_version ]]; then
 		echo
@@ -238,9 +237,9 @@ update_BaiduPCS-Web.sh() {
 		echo
 		echo -e " $green 咦...发现新版本耶....正在拼命更新.......$none"
 		echo
-		cd /etc/BaiduPCS-Web/233boy/BaiduPCS-Web
+		cd /etc/BaiduPCS-Web/shaoxia/BaiduPCS-Web
 		git pull
-		cp -f /etc/BaiduPCS-Web/233boy/BaiduPCS-Web/BaiduPCS-Go.sh $_BaiduPCS-Web_sh
+		cp -f /etc/BaiduPCS-Web/shaoxia/BaiduPCS-Web/baidupcs.sh $_BaiduPCS-Web_sh
 		chmod +x $_BaiduPCS-Web_sh
 		echo
 		echo -e "$green 更新成功啦...当前 BaiduPCS-Web 管理脚本 版本: ${cyan}$latest_version$none"
@@ -290,8 +289,6 @@ uninstall_BaiduPCS-Web() {
 		if [[ $systemd ]]; then
 			systemctl disable BaiduPCS-Web >/dev/null 2>&1
 			rm -rf /lib/systemd/system/BaiduPCS-Web.service
-			systemctl disable caddy >/dev/null 2>&1
-			rm -rf /lib/systemd/system/caddy.service
 		else
 			update-rc.d -f BaiduPCS-Web remove >/dev/null 2>&1
 			rm -rf /etc/init.d/BaiduPCS-Web
@@ -302,7 +299,7 @@ uninstall_BaiduPCS-Web() {
 		echo
 		echo "如果你觉得这个脚本有哪些地方不够好的话...请告诉我"
 		echo
-		echo "反馈问题: https://github.com/233boy/BaiduPCS-Web/issues"
+		echo "反馈问题: https://github.com/user1121114685/baidupcsweb/issues/new"
 		echo
 
 }
@@ -362,15 +359,10 @@ menu() {
 		echo
 		echo -e "## BaiduPCS-Web 版本: $cyan$BaiduPCS-Web_ver$none  /  BaiduPCS-Web 状态: $BaiduPCS-Web_status ##"
 		echo
-		echo "帮助说明: https://BaiduPCS-Web66.com/post/1/"
+		echo "反馈问题: https://github.com/user1121114685/baidupcsweb/issues/new"
 		echo
-		echo "反馈问题: https://github.com/233boy/BaiduPCS-Web/issues"
+		echo "捐赠脚本作者: 没有开通捐赠通道"
 		echo
-		echo "TG 群组: https://t.me/blog233"
-		echo
-		echo "捐赠脚本作者: https://BaiduPCS-Web66.com/donate/"
-		echo
-		echo "捐助 BaiduPCS-Web: https://www.BaiduPCS-Web.com/chapter_00/02_donate.html"
 		echo
 		echo -e "$yellow 1. $none查看 BaiduPCS-Web 配置"
 		echo
