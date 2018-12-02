@@ -5,7 +5,7 @@ export PATH
 sh_ver="1.0.0"
 file="/root/BaiduPCS-Web"
 Folder="/usr/local/BaiduPCS-Web"
-BaiduPCS-Go="/usr/bin/BaiduPCS-Go"
+BaiduPCS_Go="/usr/bin/BaiduPCS-Go"
 
 red='\e[91m'
 green='\e[92m'
@@ -276,4 +276,3 @@ case "$num" in
 	echo "请输入正确数字 [0-6]"
 	;;
 esac
-fi
