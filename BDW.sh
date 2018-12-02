@@ -200,7 +200,7 @@ Uninstall_BaiduPCS-Web(){
 
 
 Update_Shell(){
-	local latest_version=$(curl -H 'Cache-Control: no-cache' -s -L "https://raw.githubusercontent.com/user1121114685/baidupcsweb/master/BDW.sh" | grep '_version' -m1 | cut -d\" -f2)
+	local latest_version=$(curl -H 'Cache-Control: no-cache' -s -L "https://raw.githubusercontent.com/user1121114685/baidupcsweb/master/BDW.sh" | grep 'sh_ver' -m1 | cut -d\" -f2)
 	if [[ ! $latest_version ]]; then
 		echo
 		echo -e " $red获取 BaiduPCS_Web 最新版本失败!!!$none"
@@ -226,7 +226,7 @@ Update_Shell(){
 }
 
 echo && echo -e " BaiduPCS-Web 一键安装管理脚本 ${Red_font_prefix}[v${sh_ver}]${Font_color_suffix}
-  -- Toyo | doub.io/shell-jc4 --
+  联盟少侠
   
  ${Green_font_prefix} 0.${Font_color_suffix} 升级脚本
 ————————————
