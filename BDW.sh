@@ -43,7 +43,7 @@ check_sys(){
 	bit=`uname -m`
 }
 check_installed_status(){
-	[[ ! -e ${BaiduPCS-Go} ]] && echo -e "${Error} BaiduPCS-Web 没有安装，请检查 !" && exit 1
+	[[ ! -e ${BaiduPCS_Go} ]] && echo -e "${Error} BaiduPCS-Web 没有安装，请检查 !" && exit 1
 	[[ ! -e ${BaiduPCS-Web_conf} ]] && echo -e "${Error} BaiduPCS-Web 配置文件不存在，请检查 !" && [[ $1 != "un" ]] && exit 1
 }
 check_pid(){
@@ -66,7 +66,7 @@ check_new_ver(){
 	fi
 }
 check_ver_comparison(){
-	BaiduPCS_Web_now_ver=$(${BaiduPCS-Go} -v|head -n 1|awk '{print $3}')
+	BaiduPCS_Web_now_ver=$(${BaiduPCS_Go} -v|head -n 1|awk '{print $3}')
 	[[ -z ${BaiduPCS_Web_now_ver} ]] && echo -e "${Error} BaiduPCS_Web 当前版本获取失败 !" && exit 1
 	if [[ "${BaiduPCS_Web_now_ver}" != "${BaiduPCS_Web_new_ver}" ]]; then
 		echo -e "${Info} 发现 BaiduPCS-Web 已有新版本 [ ${BaiduPCS_Web_new_ver} ](当前版本：${BaiduPCS_Web_now_ver})"
@@ -137,7 +137,7 @@ Service_BaiduPCS-Web(){
  }
 Install_BaiduPCS-Web(){
 	check_root
-	[[ -e ${BaiduPCS-Go} ]] && echo -e "${Error} BaiduPCS-Web 已安装，请检查 !" && exit 1
+	[[ -e ${BaiduPCS_Go} ]] && echo -e "${Error} BaiduPCS-Web 已安装，请检查 !" && exit 1
 	check_sys
 	echo -e "${Info} 开始安装/配置 依赖..."
 	Installation_dependency
@@ -183,7 +183,7 @@ Uninstall_BaiduPCS-Web(){
 	if [[ ${unyn} == [Yy] ]]; then
 		check_pid
 		[[ ! -z $PID ]] && kill -9 ${PID}
-		rm -rf "${BaiduPCS-Go}"
+		rm -rf "${BaiduPCS_Go}"
 		rm -rf "${Folder}"
 		rm -rf "${file}"
 		if [[ ${release} = "centos" ]]; then
@@ -238,7 +238,7 @@ echo && echo -e " BaiduPCS-Web 一键安装管理脚本 ${Red_font_prefix}[v${sh
  ${Green_font_prefix} 5.${Font_color_suffix} 停止 BaiduPCS-Web
  ${Green_font_prefix} 6.${Font_color_suffix} 重启 BaiduPCS-Web
 ————————————" && echo
-if [[ -e ${BaiduPCS-Go} ]]; then
+if [[ -e ${BaiduPCS_Go} ]]; then
 	check_pid
 	if [[ ! -z "${PID}" ]]; then
 		echo -e " 当前状态: ${Green_font_prefix}已安装${Font_color_suffix} 并 ${Green_font_prefix}已启动${Font_color_suffix}"
