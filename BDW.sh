@@ -109,14 +109,14 @@ Download_BaiduPCS_Web(){
 ## 以后再修改
 Service_BaiduPCS_Web(){
 	if [[ ${release} = "centos" ]]; then
-		if ! wget --no-check-certificate https://raw.githubusercontent.com/user1121114685/baidupcsweb/master/BaiduPCS_Web_centos -O /etc/init.d/BaiduPCSWeb; then
+		if ! wget --no-check-certificate https://raw.githubusercontent.com/user1121114685/baidupcsweb/master/BaiduPCSWeb_centos -O /etc/init.d/BaiduPCSWeb; then
 			echo -e "${Error} BaiduPCS-Web服务 管理脚本下载失败 !" && exit 1
 		fi
 		chmod +x /etc/init.d/BaiduPCSWeb
 		chkconfig --add BaiduPCSWeb
 		chkconfig BaiduPCSWeb on
 	else
-		if ! wget --no-check-certificate https://raw.githubusercontent.com/user1121114685/baidupcsweb/master/BaiduPCS_Web_debian -O /etc/init.d/BaiduPCSWeb; then
+		if ! wget --no-check-certificate https://raw.githubusercontent.com/user1121114685/baidupcsweb/master/BaiduPCSWeb_debian -O /etc/init.d/BaiduPCSWeb; then
 			echo -e "${Error} BaiduPCS-Web服务 管理脚本下载失败 !" && exit 1
 		fi
 		chmod +x /etc/init.d/BaiduPCSWeb
