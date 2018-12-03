@@ -43,7 +43,7 @@ check_sys(){
 	bit=`uname -m`
 }
 check_installed_status(){
-	[[ ! -e ${BaiduPCS_Go} ]] && echo -e "${Error} BaiduPCS-Web 没有安装，请检查 !" && exit 1
+	[[ ! -e ${Folder} ]] && echo -e "${Error} BaiduPCS-Web 没有安装，请检查 !" && exit 1
 }
 check_pid(){
 	PID=`ps -ef| grep "BaiduPCS-Go"| grep -v grep| grep -v "BDW.sh"| grep -v "init.d"| grep -v "service"| awk '{print $2}'`
@@ -93,14 +93,14 @@ Download_BaiduPCS_Web(){
 		bit="arm64"
 	fi
 	wget -N --no-check-certificate "http://qiniu.zoranjojo.top/BaiduPCS-Go-${BaiduPCS_Web_new_ver}-linux-${bit}.zip"
-	BaiduPCS_Web_Name="BaiduPCS-Go-${BaiduPCS_Web_new_ver}-linux-${bit}.zip"
-	[[ ! -s ${BaiduPCS_Web_Name} ]] && echo -e "${Error} BaiduPCS-Web 压缩包下载失败 !" && exit 1
-	unzip ${BaiduPCS_Web_Name}
-	[[ ! -e "/usr/local/${BaiduPCS_Web_Name}" ]] && echo -e "${Error} BaiduPCS-Web 解压失败 !" && rm -rf ${BaiduPCS_Web_Name} && exit 1
+	BaiduPCS_Web_Name="BaiduPCS-Go-${BaiduPCS_Web_new_ver}-linux-${bit}"
+	[[ ! -s ${BaiduPCS_Web_Name}.zip ]] && echo -e "${Error} BaiduPCS-Web 压缩包下载失败 !" && exit 1
+	unzip ${BaiduPCS_Web_Name}.zip
+	[[ ! -e "/usr/local/${BaiduPCS_Web_Name}" ]] && echo -e "${Error} BaiduPCS-Web 解压失败 !" && rm -rf ${BaiduPCS_Web_Name}.zip && exit 1
 	[[ ${update_dl} = "update" ]] && rm -rf "${Folder}"
 	mv "/usr/local/${BaiduPCS_Web_Name}" "${Folder}"
-	[[ ! -e "${Folder}" ]] && echo -e "${Error} BaiduPCS-Web 文件夹重命名失败 !" && rm -rf ${BaiduPCS_Web_Name} && rm -rf "/usr/local/${BaiduPCS_Web_Name}" && exit 1
-	rm -rf ${BaiduPCS_Web_Name}
+	[[ ! -e "${Folder}" ]] && echo -e "${Error} BaiduPCS-Web 文件夹重命名失败 !" && rm -rf ${BaiduPCS_Web_Name}.zip && rm -rf "/usr/local/${BaiduPCS_Web_Name}" && exit 1
+	rm -rf ${BaiduPCS_Web_Name}.zip
 	cd "${Folder}"
 	chmod a+x BaiduPCS-Go
 	echo -e "${Info} BaiduPCS-Web 主程序安装完毕！..."
