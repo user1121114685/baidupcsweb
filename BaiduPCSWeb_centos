@@ -39,7 +39,6 @@ do_start(){
 		sleep 2s
 		check_running
 		if [[ $? -eq 0 ]]; then
-			View_Config
 			echo -e "${Info} $NAME 启动成功 !"
 		else
 			echo -e "${Error} $NAME 启动失败 !"
