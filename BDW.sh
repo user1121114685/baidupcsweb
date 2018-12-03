@@ -224,7 +224,11 @@ Update_Shell(){
 }
 
 echo && echo -e " BaiduPCS-Web 一键安装管理脚本 ${Red_font_prefix}[v${sh_ver}]${Font_color_suffix}
-  联盟少侠
+		by 联盟少侠 
+
+管理地址:http://你的IP:5299 (支持外网访问)
+
+
   
  ${Green_font_prefix} 0.${Font_color_suffix} 升级脚本
 ————————————
@@ -236,7 +240,7 @@ echo && echo -e " BaiduPCS-Web 一键安装管理脚本 ${Red_font_prefix}[v${sh
  ${Green_font_prefix} 5.${Font_color_suffix} 停止 BaiduPCS-Web
  ${Green_font_prefix} 6.${Font_color_suffix} 重启 BaiduPCS-Web
 ————————————" && echo
-if [[ -e ${BaiduPCS_Go} ]]; then
+if [[ -e ${Folder} ]]; then
 	check_pid
 	if [[ ! -z "${PID}" ]]; then
 		echo -e " 当前状态: ${Green_font_prefix}已安装${Font_color_suffix} 并 ${Green_font_prefix}已启动${Font_color_suffix}"
