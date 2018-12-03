@@ -35,7 +35,7 @@ do_start(){
 	else
 		echo -e "${Info} $NAME 启动中..."
 		ulimit -n 51200
-		nohup BaiduPCS-Go 2>&1 &
+		nohup /usr/local/BaiduPCSWeb/BaiduPCS-Go 2>&1 &
 		sleep 2s
 		check_running
 		if [[ $? -eq 0 ]]; then
