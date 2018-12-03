@@ -3,8 +3,8 @@ PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
 export PATH
 
 sh_ver="1.0.0"
-file="/root/BaiduPCS-Web"
-Folder="/usr/local/BaiduPCS-Web"
+file="/root/BaiduPCSWeb"
+Folder="/usr/local/BaiduPCSWeb"
 BaiduPCS_Go="/usr/bin/BaiduPCS-Go"
 
 red='\e[91m'
@@ -44,19 +44,18 @@ check_sys(){
 }
 check_installed_status(){
 	[[ ! -e ${BaiduPCS_Go} ]] && echo -e "${Error} BaiduPCS-Web 没有安装，请检查 !" && exit 1
-	[[ ! -e ${BaiduPCS-Web_conf} ]] && echo -e "${Error} BaiduPCS-Web 配置文件不存在，请检查 !" && [[ $1 != "un" ]] && exit 1
 }
 check_pid(){
 	PID=`ps -ef| grep "BaiduPCS-Go"| grep -v grep| grep -v "BDW.sh"| grep -v "init.d"| grep -v "service"| awk '{print $2}'`
 }
 check_new_ver(){
-	echo -e "${Info} 请输入 BaiduPCS-Web 版本号，格式如：[ 1.34.0 ]，获取地址：[ https://github.com/liuzhuoling2011/baidupcs-web/releases ]"
+	echo -e "${Info} 请输入 BaiduPCS-Web 版本号，格式如：[ 3.5.9 ]，获取地址：[ https://github.com/liuzhuoling2011/baidupcs-web/releases ]"
 	read -e -p "默认回车自动获取最新版本号:" BaiduPCS_Web_new_ver
 	if [[ -z ${BaiduPCS_Web_new_ver} ]]; then
 		BaiduPCS_Web_new_ver="$(curl -H 'Cache-Control: no-cache' -s "https://api.github.com/repos/liuzhuoling2011/BaiduPCS-Web/releases/latest" | grep 'tag_name' | cut -d\" -f4)"
 		if [[ -z ${BaiduPCS_Web_new_ver} ]]; then
 			echo -e "${Error} BaiduPCS-Web 最新版本获取失败，请手动获取最新版本号[ https://github.com/liuzhuoling2011/baidupcs-web/releases ]"
-			read -e -p "请输入版本号 [ 格式如 1.34.0 ] :" BaiduPCS_Web_new_ver
+			read -e -p "请输入版本号 [ 格式如 3.5.9 ] :" BaiduPCS_Web_new_ver
 			[[ -z "${BaiduPCS_Web_new_ver}" ]] && echo "取消..." && exit 1
 		else
 			echo -e "${Info} 检测到 BaiduPCS-Web 最新版本为 [ ${BaiduPCS_Web_new_ver} ]"
@@ -75,14 +74,14 @@ check_ver_comparison(){
 		if [[ $yn == [Yy] ]]; then
 			check_pid
 			[[ ! -z $PID ]] && kill -9 ${PID}
-			Download_BaiduPCS-Web "update"
-			Start_BaiduPCS-Web
+			Download_BaiduPCS_Web "update"
+			Start_BaiduPCS_Web
 		fi
 	else
 		echo -e "${Info} 当前 BaiduPCS-Web 已是最新版本 [ ${BaiduPCS_Web_new_ver} ]" && exit 1
 	fi
 }
-Download_BaiduPCS-Web(){
+Download_BaiduPCS_Web(){
 	update_dl=$1
 	cd "/usr/local"
 	#echo -e "${bit}"
@@ -94,34 +93,34 @@ Download_BaiduPCS-Web(){
 		bit="arm64"
 	fi
 	wget -N --no-check-certificate "http://qiniu.zoranjojo.top/BaiduPCS-Go-${BaiduPCS_Web_new_ver}-linux-${bit}.zip"
-	BaiduPCS-Web_Name="BaiduPCS-Go-${BaiduPCS_Web_new_ver}-linux-${bit}.zip"
-	[[ ! -s ${BaiduPCS-Web_Name} ]] && echo -e "${Error} BaiduPCS-Web 压缩包下载失败 !" && exit 1
-	unzip ${BaiduPCS-Web_Name}
-	[[ ! -e "/usr/local/${BaiduPCS-Web_Name}" ]] && echo -e "${Error} BaiduPCS-Web 解压失败 !" && rm -rf ${BaiduPCS-Web_Name} && exit 1
+	BaiduPCS_Web_Name="BaiduPCS-Go-${BaiduPCS_Web_new_ver}-linux-${bit}.zip"
+	[[ ! -s ${BaiduPCS_Web_Name} ]] && echo -e "${Error} BaiduPCS-Web 压缩包下载失败 !" && exit 1
+	unzip ${BaiduPCS_Web_Name}
+	[[ ! -e "/usr/local/${BaiduPCS_Web_Name}" ]] && echo -e "${Error} BaiduPCS-Web 解压失败 !" && rm -rf ${BaiduPCS_Web_Name} && exit 1
 	[[ ${update_dl} = "update" ]] && rm -rf "${Folder}"
-	mv "/usr/local/${BaiduPCS-Web_Name}" "${Folder}"
-	[[ ! -e "${Folder}" ]] && echo -e "${Error} BaiduPCS-Web 文件夹重命名失败 !" && rm -rf ${BaiduPCS-Web_Name} && rm -rf "/usr/local/${BaiduPCS-Web_Name}" && exit 1
-	rm -rf ${BaiduPCS-Web_Name}
+	mv "/usr/local/${BaiduPCS_Web_Name}" "${Folder}"
+	[[ ! -e "${Folder}" ]] && echo -e "${Error} BaiduPCS-Web 文件夹重命名失败 !" && rm -rf ${BaiduPCS_Web_Name} && rm -rf "/usr/local/${BaiduPCS_Web_Name}" && exit 1
+	rm -rf ${BaiduPCS_Web_Name}
 	cd "${Folder}"
 	chmod a+x BaiduPCS-Go
 	echo -e "${Info} BaiduPCS-Web 主程序安装完毕！..."
 }
 
 ## 以后再修改
-Service_BaiduPCS-Web(){
+Service_BaiduPCS_Web(){
 	if [[ ${release} = "centos" ]]; then
-		if ! wget --no-check-certificate https://raw.githubusercontent.com/user1121114685/baidupcsweb/master/BaiduPCS-Web_centos -O /etc/init.d/BaiduPCS-Web; then
+		if ! wget --no-check-certificate https://raw.githubusercontent.com/user1121114685/baidupcsweb/master/BaiduPCS_Web_centos -O /etc/init.d/BaiduPCSWeb; then
 			echo -e "${Error} BaiduPCS-Web服务 管理脚本下载失败 !" && exit 1
 		fi
-		chmod +x /etc/init.d/BaiduPCS-Web
-		chkconfig --add BaiduPCS-Web
-		chkconfig BaiduPCS-Web on
+		chmod +x /etc/init.d/BaiduPCSWeb
+		chkconfig --add BaiduPCSWeb
+		chkconfig BaiduPCSWeb on
 	else
-		if ! wget --no-check-certificate https://raw.githubusercontent.com/user1121114685/baidupcsweb/master/BaiduPCS-Web_debian -O /etc/init.d/BaiduPCS-Web; then
+		if ! wget --no-check-certificate https://raw.githubusercontent.com/user1121114685/baidupcsweb/master/BaiduPCS_Web_debian -O /etc/init.d/BaiduPCSWeb; then
 			echo -e "${Error} BaiduPCS-Web服务 管理脚本下载失败 !" && exit 1
 		fi
-		chmod +x /etc/init.d/BaiduPCS-Web
-		update-rc.d -f BaiduPCS-Web defaults
+		chmod +x /etc/init.d/BaiduPCSWeb
+		update-rc.d -f BaiduPCSWeb defaults
 	fi
 	echo -e "${Info} BaiduPCS-Web服务 管理脚本下载完成 !"
 }
@@ -135,7 +134,7 @@ Service_BaiduPCS-Web(){
 		apt-get install -y git zip unzip curl wget
  	fi
  }
-Install_BaiduPCS-Web(){
+Install_BaiduPCS_Web(){
 	check_root
 	[[ -e ${BaiduPCS_Go} ]] && echo -e "${Error} BaiduPCS-Web 已安装，请检查 !" && exit 1
 	check_sys
@@ -143,38 +142,37 @@ Install_BaiduPCS-Web(){
 	Installation_dependency
 	echo -e "${Info} 开始下载/安装 主程序..."
 	check_new_ver
-	Download_BaiduPCS-Web
+	Download_BaiduPCS_Web
 	echo -e "${Info} 开始下载/安装 服务脚本(init)..."
-	Service_BaiduPCS-Web
+	Service_BaiduPCS_Web
 	echo -e "${Info} 所有步骤 安装完毕，开始启动..."
-	Start_BaiduPCS-Web
+	Start_BaiduPCS_Web
 }
-Start_BaiduPCS-Web(){
+Start_BaiduPCS_Web(){
 	check_installed_status
 	check_pid
 	[[ ! -z ${PID} ]] && echo -e "${Error} BaiduPCS-Web 正在运行，请检查 !" && exit 1
-	./BaiduPCS-Go
-	/etc/init.d/BaiduPCS-Web start
+	/etc/init.d/BaiduPCSWeb start
 }
-Stop_BaiduPCS-Web(){
+Stop_BaiduPCS_Web(){
 	check_installed_status
 	check_pid
 	[[ -z ${PID} ]] && echo -e "${Error} BaiduPCS-Web 没有运行，请检查 !" && exit 1
-	/etc/init.d/BaiduPCS-Web stop
+	/etc/init.d/BaiduPCSWeb stop
 }
-Restart_BaiduPCS-Web(){
+ReStart_BaiduPCS_Web(){
 	check_installed_status
 	check_pid
-	[[ ! -z ${PID} ]] && /etc/init.d/BaiduPCS-Web stop
-	/etc/init.d/BaiduPCS-Web start
+	[[ ! -z ${PID} ]] && /etc/init.d/BaiduPCSWeb stop
+	/etc/init.d/BaiduPCSWeb start
 }
 
-Update_BaiduPCS-Web(){
+Update_BaiduPCS_Web(){
 	check_installed_status
 	check_new_ver
 	check_ver_comparison
 }
-Uninstall_BaiduPCS-Web(){
+UnInstall_BaiduPCS_Web(){
 	check_installed_status "un"
 	echo "确定要卸载 BaiduPCS-Web ? (y/N)"
 	echo
@@ -187,11 +185,11 @@ Uninstall_BaiduPCS-Web(){
 		rm -rf "${Folder}"
 		rm -rf "${file}"
 		if [[ ${release} = "centos" ]]; then
-			chkconfig --del BaiduPCS-Web
+			chkconfig --del BaiduPCSWeb
 		else
-			update-rc.d -f BaiduPCS-Web remove
+			update-rc.d -f BaiduPCSWeb remove
 		fi
-		rm -rf "/etc/init.d/BaiduPCS-Web"
+		rm -rf "/etc/init.d/BaiduPCSWeb"
 		echo && echo "BaiduPCS-Web 卸载完成 !" && echo
 	else
 		echo && echo "卸载已取消..." && echo
@@ -255,22 +253,22 @@ case "$num" in
 	Update_Shell
 	;;
 	1)
-	Install_BaiduPCS-Web
+	Install_BaiduPCS_Web
 	;;
 	2)
-	Update_BaiduPCS-Web
+	Update_BaiduPCS_Web
 	;;
 	3)
-	Uninstall_BaiduPCS-Web
+	UnInstall_BaiduPCS_Web
 	;;
 	4)
-	Start_BaiduPCS-Web
+	Start_BaiduPCS_Web
 	;;
 	5)
-	Stop_BaiduPCS-Web
+	Stop_BaiduPCS_Web
 	;;
 	6)
-	Restart_BaiduPCS-Web
+	ReStart_BaiduPCS_Web
 	;;
 	*)
 	echo "请输入正确数字 [0-6]"
