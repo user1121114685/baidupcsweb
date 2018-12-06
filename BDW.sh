@@ -14,7 +14,9 @@ magenta='\e[95m'
 cyan='\e[96m'
 none='\e[0m'
 
-BaiduPCS_port=cat ${Folder}/port
+BaiduPCS_port(){
+	cat ${Folder}/port
+}
 
 Green_font_prefix="\033[32m" && Red_font_prefix="\033[31m" && Green_background_prefix="\033[42;37m" && Red_background_prefix="\033[41;37m" && Font_color_suffix="\033[0m"
 Info="${Green_font_prefix}[信息]${Font_color_suffix}"
