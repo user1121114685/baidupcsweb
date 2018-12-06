@@ -14,7 +14,7 @@ magenta='\e[95m'
 cyan='\e[96m'
 none='\e[0m'
 
-BaiduPCS_port='cat ${Folder}/port'
+BaiduPCS_port=cat ${Folder}/port
 
 Green_font_prefix="\033[32m" && Red_font_prefix="\033[31m" && Green_background_prefix="\033[42;37m" && Red_background_prefix="\033[41;37m" && Font_color_suffix="\033[0m"
 Info="${Green_font_prefix}[信息]${Font_color_suffix}"
@@ -55,18 +55,17 @@ Set_BaiduPCS_port(){
 		echo -e "请输入 "$yellow"V2Ray"$BaiduPCS" 端口 ["$magenta"1-65535"$none"]"
 		echo -e "官方默认端口["$magenta"5299"$none"]"
 		read -p "$(echo -e "(当前端口: ${cyan}${BaiduPCS_port}$none):")" BaiduPCS_port_opt
-		[[ -z $BaiduPCS_port_opt ]] && error && continue
+		[[ -z $BaiduPCS_port_opt ]] && echo "输入错误请重新输入" && continue
 		case $BaiduPCS_port_opt in
 		$BaiduPCS_port)
 			echo
 			echo " 哎呀...跟当前端口一毛一样呀...修改个鸡鸡哦"
-			error
 			;;
 		[1-9] | [1-9][0-9] | [1-9][0-9][0-9] | [1-9][0-9][0-9][0-9] | [1-5][0-9][0-9][0-9][0-9] | 6[0-4][0-9][0-9][0-9] | 65[0-4][0-9][0-9] | 655[0-3][0-5])
 		echo "$BaiduPCS_port_opt" > ${Folder}/port
 		;;
 		*)
-		error
+		echo "输入错误请重新输入"
 		;;
 		esac
 
