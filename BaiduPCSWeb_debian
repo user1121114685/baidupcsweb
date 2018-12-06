@@ -15,6 +15,7 @@ export PATH
 
 NAME="BaiduPCSWeb"
 NAME_BIN="BaiduPCS-Go"
+check_port='cat ${Folder}/port'
 
 Green_font_prefix="\033[32m" && Red_font_prefix="\033[31m" && Green_background_prefix="\033[42;37m" && Red_background_prefix="\033[41;37m" && Font_color_suffix="\033[0m"
 Info="${Green_font_prefix}[信息]${Font_color_suffix}"
@@ -36,7 +37,7 @@ do_start(){
 	else
 		echo -e "${Info} $NAME 启动中..."
 		ulimit -n 51200
-		nohup /usr/local/BaiduPCSWeb/BaiduPCS-Go 2>&1 &
+		nohup /usr/local/BaiduPCSWeb/BaiduPCS-Go web --port ${check_port} 2>&1 &
 		sleep 2s
 		check_running
 		if [[ $? -eq 0 ]]; then

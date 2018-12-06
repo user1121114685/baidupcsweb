@@ -2,7 +2,7 @@
 PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
 export PATH
 
-sh_ver="1.0.0"
+sh_ver="1.0.1"
 file="/root/BaiduPCSWeb"
 Folder="/usr/local/BaiduPCSWeb"
 BaiduPCS_Go="/usr/bin/BaiduPCS-Go"
@@ -14,6 +14,7 @@ magenta='\e[95m'
 cyan='\e[96m'
 none='\e[0m'
 
+BaiduPCS_port='cat ${Folder}/port'
 
 Green_font_prefix="\033[32m" && Red_font_prefix="\033[31m" && Green_background_prefix="\033[42;37m" && Red_background_prefix="\033[41;37m" && Font_color_suffix="\033[0m"
 Info="${Green_font_prefix}[信息]${Font_color_suffix}"
@@ -48,6 +49,31 @@ check_installed_status(){
 check_pid(){
 	PID=`ps -ef| grep "BaiduPCS-Go"| grep -v grep| grep -v "BDW.sh"| grep -v "init.d"| grep -v "service"| awk '{print $2}'`
 }
+Set_BaiduPCS_port(){
+	echo
+	while :; do
+		echo -e "请输入 "$yellow"V2Ray"$BaiduPCS" 端口 ["$magenta"1-65535"$none"]"
+		echo -e "官方默认端口["$magenta"5299"$none"]"
+		read -p "$(echo -e "(当前端口: ${cyan}${BaiduPCS_port}$none):")" BaiduPCS_port_opt
+		[[ -z $BaiduPCS_port_opt ]] && error && continue
+		case $BaiduPCS_port_opt in
+		$BaiduPCS_port)
+			echo
+			echo " 哎呀...跟当前端口一毛一样呀...修改个鸡鸡哦"
+			error
+			;;
+		[1-9] | [1-9][0-9] | [1-9][0-9][0-9] | [1-9][0-9][0-9][0-9] | [1-5][0-9][0-9][0-9][0-9] | 6[0-4][0-9][0-9][0-9] | 65[0-4][0-9][0-9] | 655[0-3][0-5])
+		echo "$BaiduPCS_port_opt" > ${Folder}/port
+		;;
+		*)
+		error
+		;;
+		esac
+
+	done
+
+}
+
 check_new_ver(){
 	echo -e "${Info} 请输入 BaiduPCS-Web 版本号，格式如：[ 3.5.9 ]，获取地址：[ https://github.com/liuzhuoling2011/baidupcs-web/releases ]"
 	read -e -p "默认回车自动获取最新版本号:" BaiduPCS_Web_new_ver
@@ -81,6 +107,7 @@ check_ver_comparison(){
 		echo -e "${Info} 当前 BaiduPCS-Web 已是最新版本 [ ${BaiduPCS_Web_new_ver} ]" && exit 1
 	fi
 }
+
 Download_BaiduPCS_Web(){
 	update_dl=$1
 	cd "/usr/local"
@@ -112,6 +139,7 @@ Service_BaiduPCS_Web(){
 		if ! wget --no-check-certificate https://raw.githubusercontent.com/user1121114685/baidupcsweb/master/BaiduPCSWeb_centos -O /etc/init.d/BaiduPCSWeb; then
 			echo -e "${Error} BaiduPCS-Web服务 管理脚本下载失败 !" && exit 1
 		fi
+		Download_BaiduPCS_port
 		chmod +x /etc/init.d/BaiduPCSWeb
 		chkconfig --add BaiduPCSWeb
 		chkconfig BaiduPCSWeb on
@@ -119,13 +147,22 @@ Service_BaiduPCS_Web(){
 		if ! wget --no-check-certificate https://raw.githubusercontent.com/user1121114685/baidupcsweb/master/BaiduPCSWeb_debian -O /etc/init.d/BaiduPCSWeb; then
 			echo -e "${Error} BaiduPCS-Web服务 管理脚本下载失败 !" && exit 1
 		fi
+		Download_BaiduPCS_port
 		chmod +x /etc/init.d/BaiduPCSWeb
 		update-rc.d -f BaiduPCSWeb defaults
 	fi
 	echo -e "${Info} BaiduPCS-Web服务 管理脚本下载完成 !"
 }
 
- Installation_dependency(){
+Download_BaiduPCS_port(){
+	if ! wget --no-check-certificate https://raw.githubusercontent.com/user1121114685/baidupcsweb/master/port -O ${Folder}; then
+		echo -e "${Error} BaiduPCS-Web服务 prot下载失败 !" && exit 1
+	fi
+	echo -e "成功下载port文件..."
+	chmod 777 ${Folder}/port
+ }
+
+Installation_dependency(){
  	if [[ ${release} = "centos" ]]; then
 		yum update
  		yum install -y  git zip unzip curl wget
@@ -145,6 +182,8 @@ Install_BaiduPCS_Web(){
 	Download_BaiduPCS_Web
 	echo -e "${Info} 开始下载/安装 服务脚本(init)..."
 	Service_BaiduPCS_Web
+	echo -e "${Info} 设置端口..."
+	Set_BaiduPCS_port
 	echo -e "${Info} 所有步骤 安装完毕，开始启动..."
 	Start_BaiduPCS_Web
 }
@@ -224,9 +263,14 @@ Update_Shell(){
 }
 
 echo && echo -e " BaiduPCS-Web 一键安装管理脚本 ${Red_font_prefix}[v${sh_ver}]${Font_color_suffix}
+
 		by 联盟少侠 
 
-管理地址:http://你的IP:5299 (支持外网访问)
+管理地址:http://你的IP:${BaiduPCS_port}(支持外网访问)
+
+BaiduPCS-Web项目地址：https://github.com/liuzhuoling2011/baidupcs-web
+
+本脚本的项目地址：https://github.com/user1121114685/baidupcsweb
 
 
   
@@ -239,6 +283,8 @@ echo && echo -e " BaiduPCS-Web 一键安装管理脚本 ${Red_font_prefix}[v${sh
  ${Green_font_prefix} 4.${Font_color_suffix} 启动 BaiduPCS-Web
  ${Green_font_prefix} 5.${Font_color_suffix} 停止 BaiduPCS-Web
  ${Green_font_prefix} 6.${Font_color_suffix} 重启 BaiduPCS-Web
+ ————————————
+ ${Green_font_prefix} 7.${Font_color_suffix} 修改 BaiduPCS-Web 端口
 ————————————" && echo
 if [[ -e ${Folder} ]]; then
 	check_pid
@@ -273,6 +319,9 @@ case "$num" in
 	;;
 	6)
 	ReStart_BaiduPCS_Web
+	;;
+	7)
+	Set_BaiduPCS_port
 	;;
 	*)
 	echo "请输入正确数字 [0-6]"
