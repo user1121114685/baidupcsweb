@@ -14,9 +14,8 @@ magenta='\e[95m'
 cyan='\e[96m'
 none='\e[0m'
 
-BaiduPCS_port(){
-	cat ${Folder}/port
-}
+BaiduPCS_port=$(cat ${Folder}/port)
+#MMP这里的cat居然是这样的
 
 Green_font_prefix="\033[32m" && Red_font_prefix="\033[31m" && Green_background_prefix="\033[42;37m" && Red_background_prefix="\033[41;37m" && Font_color_suffix="\033[0m"
 Info="${Green_font_prefix}[信息]${Font_color_suffix}"
@@ -51,24 +50,27 @@ check_installed_status(){
 check_pid(){
 	PID=`ps -ef| grep "BaiduPCS-Go"| grep -v grep| grep -v "BDW.sh"| grep -v "init.d"| grep -v "service"| awk '{print $2}'`
 }
+
 Set_BaiduPCS_port(){
 	echo
 	while :; do
-		echo -e "请输入 "$yellow"V2Ray"$BaiduPCS" 端口 ["$magenta"1-65535"$none"]"
+		echo -e "请输入 "$yellow"BaiduPCS"$BaiduPCS" 端口 ["$magenta"1-65535"$none"]"
 		echo -e "官方默认端口["$magenta"5299"$none"]"
-		read -p "$(echo -e "(当前端口: ${cyan}${BaiduPCS_port}$none):")" BaiduPCS_port_opt
-		[[ -z $BaiduPCS_port_opt ]] && echo "输入错误请重新输入" && continue
-		case $BaiduPCS_port_opt in
+		read -e -p "$(echo -e "(当前端口: ${cyan}${BaiduPCS_port}$none):")" BaiduPCS_port_opt
+		case "$BaiduPCS_port_opt" in
 		$BaiduPCS_port)
 			echo
 			echo " 哎呀...跟当前端口一毛一样呀...修改个鸡鸡哦"
 			;;
 		[1-9] | [1-9][0-9] | [1-9][0-9][0-9] | [1-9][0-9][0-9][0-9] | [1-5][0-9][0-9][0-9][0-9] | 6[0-4][0-9][0-9][0-9] | 65[0-4][0-9][0-9] | 655[0-3][0-5])
-		echo "$BaiduPCS_port_opt" > ${Folder}/port
-		;;
+			echo "$BaiduPCS_port_opt" > ${Folder}/port
+			ReStart_BaiduPCS_Web
+			##卧槽TM，一个break让我找半天，没有这个，根本跳转不出来！;;是摆设吗？MMP！
+			break
+			;;
 		*)
-		echo "输入错误请重新输入"
-		;;
+			echo "输入错误请重新输入"
+			;;
 		esac
 
 	done
@@ -156,7 +158,7 @@ Service_BaiduPCS_Web(){
 }
 
 Download_BaiduPCS_port(){
-	if ! wget --no-check-certificate https://raw.githubusercontent.com/user1121114685/baidupcsweb/master/port -O ${Folder}; then
+	if ! wget --no-check-certificate https://raw.githubusercontent.com/user1121114685/baidupcsweb/master/port -O ${Folder}/port; then
 		echo -e "${Error} BaiduPCS-Web服务 prot下载失败 !" && exit 1
 	fi
 	echo -e "成功下载port文件..."
@@ -298,7 +300,7 @@ else
 	echo -e " 当前状态: ${Red_font_prefix}未安装${Font_color_suffix}"
 fi
 echo
-read -e -p " 请输入数字 [0-10]:" num
+read -e -p " 请输入数字 [0-7]:" num
 case "$num" in
 	0)
 	Update_Shell
@@ -325,6 +327,6 @@ case "$num" in
 	Set_BaiduPCS_port
 	;;
 	*)
-	echo "请输入正确数字 [0-6]"
+	echo "请输入正确数字 [0-7]"
 	;;
 esac
