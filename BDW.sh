@@ -2,7 +2,7 @@
 PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
 export PATH
 
-sh_ver="1.0.1"
+sh_ver="1.0.2"
 file="/root/BaiduPCSWeb"
 Folder="/usr/local/BaiduPCSWeb"
 BaiduPCS_Go="/usr/bin/BaiduPCS-Go"
@@ -61,6 +61,7 @@ Set_BaiduPCS_port(){
 		$BaiduPCS_port)
 			echo
 			echo " 哎呀...跟当前端口一毛一样呀...修改个鸡鸡哦"
+			break
 			;;
 		[1-9] | [1-9][0-9] | [1-9][0-9][0-9] | [1-9][0-9][0-9][0-9] | [1-5][0-9][0-9][0-9][0-9] | 6[0-4][0-9][0-9][0-9] | 65[0-4][0-9][0-9] | 655[0-3][0-5])
 			echo "$BaiduPCS_port_opt" > ${Folder}/port
@@ -94,7 +95,7 @@ check_new_ver(){
 	fi
 }
 check_ver_comparison(){
-	BaiduPCS_Web_now_ver=$(${BaiduPCS_Go} -v|head -n 1|awk '{print $3}')
+	BaiduPCS_Web_now_ver=$(${Folder}/BaiduPCS-Go -v|head -n 1|awk '{print $3}')
 	[[ -z ${BaiduPCS_Web_now_ver} ]] && echo -e "${Error} BaiduPCS_Web 当前版本获取失败 !" && exit 1
 	if [[ "${BaiduPCS_Web_now_ver}" != "${BaiduPCS_Web_new_ver}" ]]; then
 		echo -e "${Info} 发现 BaiduPCS-Web 已有新版本 [ ${BaiduPCS_Web_new_ver} ](当前版本：${BaiduPCS_Web_now_ver})"
@@ -226,6 +227,7 @@ UnInstall_BaiduPCS_Web(){
 		rm -rf "${BaiduPCS_Go}"
 		rm -rf "${Folder}"
 		rm -rf "${file}"
+		rm -rf "${Folder}/port"
 		if [[ ${release} = "centos" ]]; then
 			chkconfig --del BaiduPCSWeb
 		else
