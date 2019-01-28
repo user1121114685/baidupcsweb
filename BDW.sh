@@ -2,7 +2,7 @@
 PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
 export PATH
 
-sh_ver="1.0.2"
+sh_ver="1.0.3"
 file="/root/BaiduPCSWeb"
 Folder="/usr/local/BaiduPCSWeb"
 BaiduPCS_Go="/usr/bin/BaiduPCS-Go"
@@ -23,23 +23,23 @@ Error="${Red_font_prefix}[错误]${Font_color_suffix}"
 Tip="${Green_font_prefix}[注意]${Font_color_suffix}"
 
 check_root(){
-	[[ $EUID != 0 ]] && echo -e "${Error} 当前非ROOT账号(或没有ROOT权限)，无法继续操作，请更换ROOT账号或使用 ${Green_background_prefix}sudo su${Font_color_suffix} 命令获取临时ROOT权限（执行后可能会提示输入当前账号的密码）。" && exit 1
+	[[ $EUID != 0 ]] && echo -ne "${Error} 当前非ROOT账号(或没有ROOT权限)，无法继续操作，请更换ROOT账号或使用 ${Green_background_prefix}sudo su${Font_color_suffix} 命令获取临时ROOT权限（执行后可能会提示输入当前账号的密码）。" && exit 1
 }
 #检查系统
 check_sys(){
 	if [[ -f /etc/redhat-release ]]; then
 		release="centos"
-	elif cat /etc/issue | grep -q -E -i "debian"; then
+	elif cat /etc/issue | grep -qEi "debian"; then
 		release="debian"
-	elif cat /etc/issue | grep -q -E -i "ubuntu"; then
+	elif cat /etc/issue | grep -qEi "ubuntu"; then
 		release="ubuntu"
-	elif cat /etc/issue | grep -q -E -i "centos|red hat|redhat"; then
+	elif cat /etc/issue | grep -qEi "centos|red hat|redhat"; then
 		release="centos"
-	elif cat /proc/version | grep -q -E -i "debian"; then
+	elif cat /proc/version | grep -qEi "debian"; then
 		release="debian"
-	elif cat /proc/version | grep -q -E -i "ubuntu"; then
+	elif cat /proc/version | grep -qEi "ubuntu"; then
 		release="ubuntu"
-	elif cat /proc/version | grep -q -E -i "centos|red hat|redhat"; then
+	elif cat /proc/version | grep -qEi "centos|red hat|redhat"; then
 		release="centos"
     fi
 	bit=`uname -m`
@@ -48,7 +48,7 @@ check_installed_status(){
 	[[ ! -e ${Folder} ]] && echo -e "${Error} BaiduPCS-Web 没有安装，请检查 !" && exit 1
 }
 check_pid(){
-	PID=`ps -ef| grep "BaiduPCS-Go"| grep -v grep| grep -v "BDW.sh"| grep -v "init.d"| grep -v "service"| awk '{print $2}'`
+	PID=$(ps -ef| grep "BaiduPCS-Go"| grep -v grep| grep -v "BDW.sh"| grep -v "init.d"| grep -v "service"| awk '{print $2}')
 }
 
 Set_BaiduPCS_port(){
@@ -104,8 +104,7 @@ check_ver_comparison(){
 		if [[ $yn == [Yy] ]]; then
 			check_pid
 			[[ ! -z $PID ]] && kill -9 ${PID}
-			Download_BaiduPCS_Web "update"
-			Start_BaiduPCS_Web
+			Download_BaiduPCS_Web
 		fi
 	else
 		echo -e "${Info} 当前 BaiduPCS-Web 已是最新版本 [ ${BaiduPCS_Web_new_ver} ]" && exit 1
@@ -113,9 +112,9 @@ check_ver_comparison(){
 }
 
 Download_BaiduPCS_Web(){
-	update_dl=$1
 	cd "/usr/local"
 	#echo -e "${bit}"
+	bit=`uname -m`
 	if [[ ${bit} == "x86_64" ]]; then
 		bit="amd64"
 	elif [[ ${bit} == "i386" || ${bit} == "i686" ]]; then
@@ -128,8 +127,12 @@ Download_BaiduPCS_Web(){
 	[[ ! -s ${BaiduPCS_Web_Name}.zip ]] && echo -e "${Error} BaiduPCS-Web 压缩包下载失败 !" && exit 1
 	unzip ${BaiduPCS_Web_Name}.zip
 	[[ ! -e "/usr/local/${BaiduPCS_Web_Name}" ]] && echo -e "${Error} BaiduPCS-Web 解压失败 !" && rm -rf ${BaiduPCS_Web_Name}.zip && exit 1
-	[[ ${update_dl} = "update" ]] && rm -rf "${Folder}"
-	mv "/usr/local/${BaiduPCS_Web_Name}" "${Folder}"
+	rm -rf "${Folder}/BaiduPCS-Go"
+	cp -f "/usr/local/${BaiduPCS_Web_Name}/BaiduPCS-Go" "${Folder}/BaiduPCS-Go"
+	if [[ ! -e "${Folder}" ]]; then 
+		echo -e "${Error} ${Folder}/BaiduPCS-Go 复制失败 !首次安装请忽略此信息！" 
+		mv "/usr/local/${BaiduPCS_Web_Name}" "${Folder}"	
+	fi
 	[[ ! -e "${Folder}" ]] && echo -e "${Error} BaiduPCS-Web 文件夹重命名失败 !" && rm -rf ${BaiduPCS_Web_Name}.zip && rm -rf "/usr/local/${BaiduPCS_Web_Name}" && exit 1
 	rm -rf ${BaiduPCS_Web_Name}.zip
 	cd "${Folder}"
@@ -159,7 +162,7 @@ Service_BaiduPCS_Web(){
 }
 
 Download_BaiduPCS_port(){
-	if ! wget --no-check-certificate https://raw.githubusercontent.com/user1121114685/baidupcsweb/master/port -O ${Folder}/port; then
+	if ! wget --no-check-certificate https://raw.githubusercontent.com/user1121114685/baidupcsweb/master/port -O "${Folder}/port"; then
 		echo -e "${Error} BaiduPCS-Web服务 prot下载失败 !" && exit 1
 	fi
 	echo -e "成功下载port文件..."
@@ -177,6 +180,12 @@ Installation_dependency(){
  }
 Install_BaiduPCS_Web(){
 	check_root
+	check_pid
+	[[ ! -z $PID ]] && kill -9 ${PID}
+	rm -rf "${BaiduPCS_Go}"
+	rm -rf "${Folder}"
+	rm -rf "${file}"
+	rm -rf "${Folder}/port"
 	[[ -e ${BaiduPCS_Go} ]] && echo -e "${Error} BaiduPCS-Web 已安装，请检查 !" && exit 1
 	check_sys
 	echo -e "${Info} 开始安装/配置 依赖..."
@@ -214,6 +223,7 @@ Update_BaiduPCS_Web(){
 	check_installed_status
 	check_new_ver
 	check_ver_comparison
+	Start_BaiduPCS_Web
 }
 UnInstall_BaiduPCS_Web(){
 	check_installed_status "un"
@@ -271,7 +281,9 @@ echo && echo -e " BaiduPCS-Web 一键安装管理脚本 ${Red_font_prefix}[v${sh
 
 		by 联盟少侠 
 
-管理地址:http://你的IP:${BaiduPCS_port}(支持外网访问)
+>>>>>>管理地址:http://你的IP:${BaiduPCS_port}(支持外网访问)<<<<<<<
+
+>>>>>>如果不能访问，请自行进行端口放行，或者端口映射<<<<<<<<<
 
 BaiduPCS-Web项目地址：https://github.com/liuzhuoling2011/baidupcs-web
 
@@ -280,17 +292,17 @@ BaiduPCS-Web项目地址：https://github.com/liuzhuoling2011/baidupcs-web
 
   
  ${Green_font_prefix} 0.${Font_color_suffix} 升级脚本
-————————————
+————————————————————————
  ${Green_font_prefix} 1.${Font_color_suffix} 安装 BaiduPCS-Web
- ${Green_font_prefix} 2.${Font_color_suffix} 更新 BaiduPCS-Web
+ ${Green_font_prefix} 2.${Font_color_suffix} 更新 BaiduPCS-Web(可指定版本)
  ${Green_font_prefix} 3.${Font_color_suffix} 卸载 BaiduPCS-Web
-————————————
+————————————————————————
  ${Green_font_prefix} 4.${Font_color_suffix} 启动 BaiduPCS-Web
  ${Green_font_prefix} 5.${Font_color_suffix} 停止 BaiduPCS-Web
  ${Green_font_prefix} 6.${Font_color_suffix} 重启 BaiduPCS-Web
- ————————————
+————————————————————————
  ${Green_font_prefix} 7.${Font_color_suffix} 修改 BaiduPCS-Web 端口
-————————————" && echo
+————————————————————————" && echo
 if [[ -e ${Folder} ]]; then
 	check_pid
 	if [[ ! -z "${PID}" ]]; then
