@@ -2,7 +2,7 @@
 PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
 export PATH
 
-sh_ver="1.0.3"
+sh_ver="1.0.4"
 file="/root/BaiduPCSWeb"
 Folder="/usr/local/BaiduPCSWeb"
 BaiduPCS_Go="/usr/bin/BaiduPCS-Go"
@@ -277,6 +277,47 @@ Update_Shell(){
 	fi
 }
 
+Set_BaiduPCS_password(){
+	echo && echo -e " 你要做什么？
+	
+ ${Green_font_prefix} 0.${Font_color_suffix} 显示密码
+————————
+ ${Green_font_prefix} 1.${Font_color_suffix} 修改密码为123456
+ ${Green_font_prefix} 2.${Font_color_suffix} 删除密码
+————————
+ ${Green_font_prefix} 3.${Font_color_suffix} 清空所有账号信息（包括密码与登陆的账号）
+ 
+ 注意：修改/删除密码、删除账号配置后，会自动重启客户端！" && echo
+	read -e -p "(默认: 取消):" set_num
+	[[ -z "${set_num}" ]] && echo "已取消..." && exit 1
+	if [[ ${set_num} == "0" ]]; then
+	echo -e "$yellow access_pass 之后的才是密码（技术受限，我也不知道怎么单独提取出来！）$none"
+	echo -e ""
+	echo -e ""
+	echo -e ""
+	grep "access_pass" ${Folder}/pcs_config.json
+	elif [[ ${set_num} == "1" ]]; then
+#	echo -e "$yellow请输入您要设置的密码"
+#	read -e -p "" BaiduPCS_passwrord_opt
+	echo -e "$yellow 正在将密码设置为 123456$none"
+		echo -e "$yellow 有能力的大佬可以指点我如何能设置成手动输入的密码！$none"
+	sed -i '/access_pass/c\ "access_pass": "123456",' ${Folder}/pcs_config.json
+	ReStart_BaiduPCS_Web
+	echo -e "$yellow 如果出现错误可以使用删除密码或者清空账号信息解决$none"
+	elif [[ ${set_num} == "2" ]]; then
+	sed -i '/access_pass/c\ "access_pass": "",' ${Folder}/pcs_config.json
+	echo -e "$yellow 密码已经删除！$none"
+	ReStart_BaiduPCS_Web
+	elif [[ ${set_num} == "3" ]]; then
+	rm -rf "${Folder}/pcs_config.json"
+	echo -e "$yellow 配置文件已经删除，请重新登录账号！$none"
+	ReStart_BaiduPCS_Web
+	else
+		echo -e "${Error} 请输入正确的数字[1-3]" && exit 1
+	fi
+}
+
+
 echo && echo -e " BaiduPCS-Web 一键安装管理脚本 ${Red_font_prefix}[v${sh_ver}]${Font_color_suffix}
 
 		by 联盟少侠 
@@ -302,6 +343,7 @@ BaiduPCS-Web项目地址：https://github.com/liuzhuoling2011/baidupcs-web
  ${Green_font_prefix} 6.${Font_color_suffix} 重启 BaiduPCS-Web
 ————————————————————————
  ${Green_font_prefix} 7.${Font_color_suffix} 修改 BaiduPCS-Web 端口
+ ${Green_font_prefix} 8.${Font_color_suffix} 查看/修改BaiduPCS-Web 密码
 ————————————————————————" && echo
 if [[ -e ${Folder} ]]; then
 	check_pid
@@ -314,7 +356,7 @@ else
 	echo -e " 当前状态: ${Red_font_prefix}未安装${Font_color_suffix}"
 fi
 echo
-read -e -p " 请输入数字 [0-7]:" num
+read -e -p " 请输入数字 [0-8]:" num
 case "$num" in
 	0)
 	Update_Shell
@@ -340,7 +382,10 @@ case "$num" in
 	7)
 	Set_BaiduPCS_port
 	;;
+	8)
+	Set_BaiduPCS_password
+	;;
 	*)
-	echo "请输入正确数字 [0-7]"
+	echo "请输入正确数字 [0-8]"
 	;;
 esac
