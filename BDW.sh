@@ -2,7 +2,7 @@
 PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
 export PATH
 
-sh_ver="1.0.4"
+sh_ver="1.0.5"
 file="/root/BaiduPCSWeb"
 Folder="/usr/local/BaiduPCSWeb"
 BaiduPCS_Go="/usr/bin/BaiduPCS-Go"
@@ -282,7 +282,7 @@ Set_BaiduPCS_password(){
 	
  ${Green_font_prefix} 0.${Font_color_suffix} 显示密码
 ————————
- ${Green_font_prefix} 1.${Font_color_suffix} 修改密码为123456
+ ${Green_font_prefix} 1.${Font_color_suffix} 修改密码
  ${Green_font_prefix} 2.${Font_color_suffix} 删除密码
 ————————
  ${Green_font_prefix} 3.${Font_color_suffix} 清空所有账号信息（包括密码与登陆的账号）
@@ -291,17 +291,20 @@ Set_BaiduPCS_password(){
 	read -e -p "(默认: 取消):" set_num
 	[[ -z "${set_num}" ]] && echo "已取消..." && exit 1
 	if [[ ${set_num} == "0" ]]; then
-	echo -e "$yellow access_pass 之后的才是密码（技术受限，我也不知道怎么单独提取出来！）$none"
+	echo -e "$yellow 下面显示的密码请忽略引号！$none"
+	echo -e ""
+	BaiduPCS_password1=$(grep access_pass ${Folder}/pcs_config.json)
+	# 从左至右从第15位开始显示
+  echo ${BaiduPCS_password1:15}
 	echo -e ""
 	echo -e ""
-	echo -e ""
-	grep "access_pass" ${Folder}/pcs_config.json
 	elif [[ ${set_num} == "1" ]]; then
-#	echo -e "$yellow请输入您要设置的密码"
-#	read -e -p "" BaiduPCS_passwrord_opt
-	echo -e "$yellow 正在将密码设置为 123456$none"
-		echo -e "$yellow 有能力的大佬可以指点我如何能设置成手动输入的密码！$none"
-	sed -i '/access_pass/c\ "access_pass": "123456",' ${Folder}/pcs_config.json
+	echo -e "$yellow请输入您要设置的密码"
+	read -e BaiduPCS_passwrord_opt
+	echo -e "$yellow 正在将密码设置为 ${BaiduPCS_passwrord_opt} $none"
+	# 替换成不常用的变量，然后再替换变量以绕过引号带来的负面伤害！
+	sed -i '/access_pass/c\ "access_pass": "shaoxia.xyz",' ${Folder}/pcs_config.json
+	sed -i "s/shaoxia.xyz/"${BaiduPCS_passwrord_opt}"/g" ${Folder}/pcs_config.json
 	ReStart_BaiduPCS_Web
 	echo -e "$yellow 如果出现错误可以使用删除密码或者清空账号信息解决$none"
 	elif [[ ${set_num} == "2" ]]; then
