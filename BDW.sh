@@ -2,7 +2,7 @@
 PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
 export PATH
 
-sh_ver="1.0.7"
+sh_ver="1.0.8"
 file="/root/BaiduPCSWeb"
 Folder="/usr/local/BaiduPCSWeb"
 BaiduPCS_Go="/usr/bin/BaiduPCS-Go"
@@ -155,6 +155,7 @@ Download_BaiduPCS_Web(){
 	fi
 	[[ ! -e "${Folder}" ]] && echo -e "${Error} BaiduPCS-Web 文件夹重命名失败 !" && rm -rf "/usr/local/${BaiduPCS_Web_Name}.zip" && rm -rf "/usr/local/${BaiduPCS_Web_Name}" && exit 1
 	rm -rf "/usr/local/${BaiduPCS_Web_Name}.zip"
+	rm -rf "/usr/local/${BaiduPCS_Web_Name}"
 	cd "${Folder}"
 	chmod a+x BaiduPCS-Go
 	echo -e "${Info} BaiduPCS-Web 主程序安装完毕！..."
@@ -307,7 +308,7 @@ Update_Shell(){
 Set_BaiduPCS_Advanced(){
 	echo && echo -e " 你要做什么？
 	
- ${Green_font_prefix} 0.${Font_color_suffix} 尝试修复
+ ${Green_font_prefix} 0.${Font_color_suffix} 尝试修复（不用重装）
 ————————
  ${Green_font_prefix} 1.${Font_color_suffix} 显示已登录的账户
  ${Green_font_prefix} 2.${Font_color_suffix} 占位（暂时不知道做什么）
