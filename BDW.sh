@@ -2,7 +2,7 @@
 PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
 export PATH
 
-sh_ver="1.0.5"
+sh_ver="1.0.6"
 file="/root/BaiduPCSWeb"
 Folder="/usr/local/BaiduPCSWeb"
 BaiduPCS_Go="/usr/bin/BaiduPCS-Go"
@@ -133,8 +133,8 @@ Download_BaiduPCS_Web(){
 		echo -e "${Error} ${Folder}/BaiduPCS-Go 复制失败 !首次安装请忽略此信息！" 
 		mv "/usr/local/${BaiduPCS_Web_Name}" "${Folder}"	
 	fi
-	[[ ! -e "${Folder}" ]] && echo -e "${Error} BaiduPCS-Web 文件夹重命名失败 !" && rm -rf ${BaiduPCS_Web_Name}.zip && rm -rf "/usr/local/${BaiduPCS_Web_Name}" && exit 1
-	rm -rf ${BaiduPCS_Web_Name}.zip
+	[[ ! -e "${Folder}" ]] && echo -e "${Error} BaiduPCS-Web 文件夹重命名失败 !" && rm -rf "/usr/local/${BaiduPCS_Web_Name}.zip" && rm -rf "/usr/local/${BaiduPCS_Web_Name}" && exit 1
+	rm -rf "/usr/local/${BaiduPCS_Web_Name}.zip"
 	cd "${Folder}"
 	chmod a+x BaiduPCS-Go
 	echo -e "${Info} BaiduPCS-Web 主程序安装完毕！..."
@@ -277,40 +277,32 @@ Update_Shell(){
 	fi
 }
 
-Set_BaiduPCS_password(){
+Set_BaiduPCS_Advanced(){
 	echo && echo -e " 你要做什么？
 	
- ${Green_font_prefix} 0.${Font_color_suffix} 显示密码
+ ${Green_font_prefix} 0.${Font_color_suffix} 尝试修复
 ————————
- ${Green_font_prefix} 1.${Font_color_suffix} 修改密码
- ${Green_font_prefix} 2.${Font_color_suffix} 删除密码
+ ${Green_font_prefix} 1.${Font_color_suffix} 显示已登录的账户
+ ${Green_font_prefix} 2.${Font_color_suffix} 占位（暂时不知道做什么）
 ————————
  ${Green_font_prefix} 3.${Font_color_suffix} 清空所有账号信息（包括密码与登陆的账号）
  
- 注意：修改/删除密码、删除账号配置后，会自动重启客户端！" && echo
+ 注意：部分操作会自动重启客户端！" && echo
 	read -e -p "(默认: 取消):" set_num
 	[[ -z "${set_num}" ]] && echo "已取消..." && exit 1
 	if [[ ${set_num} == "0" ]]; then
-	echo -e "$yellow 下面显示的密码请忽略引号！$none"
+	echo -e "$yellow 开始修复，请保证你目前使用的是最新脚本。$none"
 	echo -e ""
-	BaiduPCS_password1=$(grep access_pass ${Folder}/pcs_config.json)
-	# 从左至右从第15位开始显示
-  echo ${BaiduPCS_password1:15}
-	echo -e ""
-	echo -e ""
+	Update_BaiduPCS_Web
+	Service_BaiduPCS_Web
+	ReStart_BaiduPCS_Web
+
 	elif [[ ${set_num} == "1" ]]; then
-	echo -e "$yellow请输入您要设置的密码"
-	read -e BaiduPCS_passwrord_opt
-	echo -e "$yellow 正在将密码设置为 ${BaiduPCS_passwrord_opt} $none"
-	# 替换成不常用的变量，然后再替换变量以绕过引号带来的负面伤害！
-	sed -i '/access_pass/c\ "access_pass": "shaoxia.xyz",' ${Folder}/pcs_config.json
-	sed -i "s/shaoxia.xyz/"${BaiduPCS_passwrord_opt}"/g" ${Folder}/pcs_config.json
-	ReStart_BaiduPCS_Web
-	echo -e "$yellow 如果出现错误可以使用删除密码或者清空账号信息解决$none"
-	elif [[ ${set_num} == "2" ]]; then
-	sed -i '/access_pass/c\ "access_pass": "",' ${Folder}/pcs_config.json
-	echo -e "$yellow 密码已经删除！$none"
-	ReStart_BaiduPCS_Web
+	echo -e "$yellow您已登录以下账户"
+	echo -e ""
+	cat "${Folder}/pcs_config.json" | grep name | cut -d\" -f4
+	echo -e "$yellow $none"
+
 	elif [[ ${set_num} == "3" ]]; then
 	rm -rf "${Folder}/pcs_config.json"
 	echo -e "$yellow 配置文件已经删除，请重新登录账号！$none"
@@ -346,7 +338,7 @@ BaiduPCS-Web项目地址：https://github.com/liuzhuoling2011/baidupcs-web
  ${Green_font_prefix} 6.${Font_color_suffix} 重启 BaiduPCS-Web
 ————————————————————————
  ${Green_font_prefix} 7.${Font_color_suffix} 修改 BaiduPCS-Web 端口
- ${Green_font_prefix} 8.${Font_color_suffix} 查看/修改BaiduPCS-Web 密码
+ ${Green_font_prefix} 8.${Font_color_suffix} 高级功能
 ————————————————————————" && echo
 if [[ -e ${Folder} ]]; then
 	check_pid
@@ -386,7 +378,7 @@ case "$num" in
 	Set_BaiduPCS_port
 	;;
 	8)
-	Set_BaiduPCS_password
+	Set_BaiduPCS_Advanced
 	;;
 	*)
 	echo "请输入正确数字 [0-8]"
