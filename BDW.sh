@@ -2,7 +2,7 @@
 PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
 export PATH
 
-sh_ver="1.0.6"
+sh_ver="1.0.7"
 file="/root/BaiduPCSWeb"
 Folder="/usr/local/BaiduPCSWeb"
 BaiduPCS_Go="/usr/bin/BaiduPCS-Go"
@@ -108,6 +108,26 @@ check_ver_comparison(){
 		fi
 	else
 		echo -e "${Info} 当前 BaiduPCS-Web 已是最新版本 [ ${BaiduPCS_Web_new_ver} ]" && exit 1
+	fi
+}
+
+check_ver_comparison_fix(){
+	BaiduPCS_Web_now_ver=$(${Folder}/BaiduPCS-Go -v|head -n 1|awk '{print $3}')
+	[[ -z ${BaiduPCS_Web_now_ver} ]] && echo -e "${Error} BaiduPCS_Web 当前版本获取失败 !" && exit 1
+	if [[ "${BaiduPCS_Web_now_ver}" != "${BaiduPCS_Web_new_ver}" ]]; then
+		echo -e "${Info} 发现 BaiduPCS-Web 已有新版本 [ ${BaiduPCS_Web_new_ver} ](当前版本：${BaiduPCS_Web_now_ver})"
+		read -e -p "是否更新(会中断当前下载任务，请注意) ? [Y/n] :" yn
+		[[ -z "${yn}" ]] && yn="y"
+		if [[ $yn == [Yy] ]]; then
+			check_pid
+			[[ ! -z $PID ]] && kill -9 ${PID}
+			Download_BaiduPCS_Web
+		fi
+	else
+		echo -e "${Info} 正在重新下载最新版本 [ ${BaiduPCS_Web_new_ver} ]"
+		check_pid
+		[[ ! -z $PID ]] && kill -9 ${PID}
+		Download_BaiduPCS_Web
 	fi
 }
 
@@ -225,6 +245,13 @@ Update_BaiduPCS_Web(){
 	check_ver_comparison
 	Start_BaiduPCS_Web
 }
+
+Fix_BaiduPCS_Web(){
+	check_installed_status
+	check_new_ver
+	check_ver_comparison_fix
+}
+
 UnInstall_BaiduPCS_Web(){
 	check_installed_status "un"
 	echo "确定要卸载 BaiduPCS-Web ? (y/N)"
@@ -293,7 +320,7 @@ Set_BaiduPCS_Advanced(){
 	if [[ ${set_num} == "0" ]]; then
 	echo -e "$yellow 开始修复，请保证你目前使用的是最新脚本。$none"
 	echo -e ""
-	Update_BaiduPCS_Web
+	Fix_BaiduPCS_Web
 	Service_BaiduPCS_Web
 	ReStart_BaiduPCS_Web
 
