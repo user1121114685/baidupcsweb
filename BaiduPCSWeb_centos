@@ -43,7 +43,16 @@ do_start(){
 		if [[ $? -eq 0 ]]; then
 			echo -e "${Info} $NAME 启动成功 !"
 		else
-			echo -e "${Error} $NAME 启动失败 !"
+			echo -e "${Error} $NAME 启动失败 正在尝试以兼容方式启动（适用于3.6.4及以下）!"
+			ulimit -n 51200
+			nohup /usr/local/BaiduPCSWeb/BaiduPCS-Go web --port ${check_port} 2>&1 &
+			sleep 2s
+			check_running
+			if [[ $? -eq 0 ]]; then
+				echo -e "${Info} $NAME 兼容方式启动成功 !"
+			else
+				echo -e "${Error} $NAME 兼容方式启动失败，终止尝试 !"
+			fi
 		fi
 	fi
 }
