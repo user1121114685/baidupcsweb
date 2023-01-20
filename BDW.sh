@@ -79,12 +79,12 @@ Set_BaiduPCS_port(){
 }
 
 check_new_ver(){
-	echo -e "${Info} 请输入 BaiduPCS-Web 版本号，格式如：[ 3.5.9 ]，获取地址：[ https://github.com/liuzhuoling2011/baidupcs-web/releases ]"
+	echo -e "${Info} 请输入 BaiduPCS-Web 版本号，格式如：[ 3.5.9 ]，获取地址：[ https://github.com/qjfoidnh/BaiduPCS-Go/releases ]"
 	read -e -p "默认回车自动获取最新版本号:" BaiduPCS_Web_new_ver
 	if [[ -z ${BaiduPCS_Web_new_ver} ]]; then
-		BaiduPCS_Web_new_ver="$(curl -H 'Cache-Control: no-cache' -s "https://api.github.com/repos/liuzhuoling2011/BaiduPCS-Web/releases/latest" | grep 'tag_name' | cut -d\" -f4)"
+		BaiduPCS_Web_new_ver="$(curl -H 'Cache-Control: no-cache' -s "https://api.github.com/repos/qjfoidnh/BaiduPCS-Go/releases/latest" | grep 'tag_name' | cut -d\" -f4)"
 		if [[ -z ${BaiduPCS_Web_new_ver} ]]; then
-			echo -e "${Error} BaiduPCS-Web 最新版本获取失败，请手动获取最新版本号[ https://github.com/liuzhuoling2011/baidupcs-web/releases ]"
+			echo -e "${Error} BaiduPCS-Web 最新版本获取失败，请手动获取最新版本号[ https://github.com/qjfoidnh/BaiduPCS-Go/releases ]"
 			read -e -p "请输入版本号 [ 格式如 3.5.9 ] :" BaiduPCS_Web_new_ver
 			[[ -z "${BaiduPCS_Web_new_ver}" ]] && echo "取消..." && exit 1
 		else
