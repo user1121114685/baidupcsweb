@@ -164,7 +164,7 @@ Download_BaiduPCS_Web(){
 ## 以后再修改
 Service_BaiduPCS_Web(){
 	if [[ ${release} = "centos" ]]; then
-		if ! wget --no-check-certificate https://raw.githubusercontent.com/user1121114685/baidupcsweb/master/BaiduPCSWeb_centos -O /etc/init.d/BaiduPCSWeb; then
+		if ! wget --no-check-certificate https://raw.githubusercontent.com/Wonderful-GW/baidupcsweb/master/BaiduPCSWeb_centos -O /etc/init.d/BaiduPCSWeb; then
 			echo -e "${Error} BaiduPCS-Web服务 管理脚本下载失败 !" && exit 1
 		fi
 		Download_BaiduPCS_port
@@ -172,7 +172,7 @@ Service_BaiduPCS_Web(){
 		chkconfig --add BaiduPCSWeb
 		chkconfig BaiduPCSWeb on
 	else
-		if ! wget --no-check-certificate https://raw.githubusercontent.com/user1121114685/baidupcsweb/master/BaiduPCSWeb_debian -O /etc/init.d/BaiduPCSWeb; then
+		if ! wget --no-check-certificate https://raw.githubusercontent.com/Wonderful-GW/baidupcsweb/master/BaiduPCSWeb_debian -O /etc/init.d/BaiduPCSWeb; then
 			echo -e "${Error} BaiduPCS-Web服务 管理脚本下载失败 !" && exit 1
 		fi
 		Download_BaiduPCS_port
@@ -183,7 +183,7 @@ Service_BaiduPCS_Web(){
 }
 
 Download_BaiduPCS_port(){
-	if ! wget --no-check-certificate https://raw.githubusercontent.com/user1121114685/baidupcsweb/master/port -O "${Folder}/port"; then
+	if ! wget --no-check-certificate https://raw.githubusercontent.com/Wonderful-GW/baidupcsweb/master/port -O "${Folder}/port"; then
 		echo -e "${Error} BaiduPCS-Web服务 prot下载失败 !" && exit 1
 	fi
 	echo -e "成功下载port文件..."
@@ -280,7 +280,7 @@ UnInstall_BaiduPCS_Web(){
 
 
 Update_Shell(){
-	local latest_version=$(curl -H 'Cache-Control: no-cache' -s -L "https://raw.githubusercontent.com/user1121114685/baidupcsweb/master/BDW.sh" | grep 'sh_ver' -m1 | cut -d\" -f2)
+	local latest_version=$(curl -H 'Cache-Control: no-cache' -s -L "https://raw.githubusercontent.com/Wonderful-GW/baidupcsweb/master/BDW.sh" | grep 'sh_ver' -m1 | cut -d\" -f2)
 	if [[ ! $latest_version ]]; then
 		echo
 		echo -e " $red获取 BaiduPCS_Web 最新版本失败!!!$none"
@@ -300,7 +300,7 @@ Update_Shell(){
 		echo
 		echo -e " $green 咦...发现新版本耶....正在拼命更新.......$none"
 		echo
-		wget -N --no-check-certificate "https://raw.githubusercontent.com/user1121114685/baidupcsweb/master/BDW.sh" && chmod +x BDW.sh
+		wget -N --no-check-certificate "https://raw.githubusercontent.com/Wonderful-GW/baidupcsweb/master/BDW.sh" && chmod +x BDW.sh
 		echo -e "脚本已更新为最新版本[ ${sh_new_ver} ] !(注意：因为更新方式为直接覆盖当前运行的脚本，所以可能下面会提示一些报错，无视即可)" && exit 0
 	fi
 }
